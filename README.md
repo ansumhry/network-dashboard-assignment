@@ -1,58 +1,58 @@
 # Protocol Visualizer
 
-A dual-panel dashboard for Computer Networks (Application Layer).
-The left panel is an activity (Browsing, Mail, Streaming). The right panel shows the DNS, HTTP and SMTP messages behind it, one step at a time.
+I made this for my Computer Networks assignment for Application Layer.
 
-Pure HTML, CSS and JavaScript. No build step and no server code. The protocols are simulated.
+It has two sides - on the left you can see what user is doing like browsing, sending mail, watching video. 
+On the right side it shows what is happening behind like DNS, HTTP, SMTP messages step by step.
 
-**Live link:** _paste your GitHub Pages link here_
+I made it using only HTML, CSS and JavaScript. No backend, no real network, everything is just simulated messages.
 
-**AI platform and model used:** _write it here (for example: Claude, Sonnet 5)_
+*Live link:* [paste your GitHub Pages link here] 
+*AI used:* Claude Sonnet 4.5 - I used it to help me structure the code and for CSS.
 
-## Run it locally
+### How to run---
 
-Open the folder in VS Code, right-click `index.html`, and choose **Open with Live Server**.
-You can also just double-click `index.html`.
+Just download the folder and open `index.html` in browser. Or if you use VS Code, right click and Open with Live Server, that works better.
 
-## Put it online with GitHub Pages
+### How to put it online---
 
-1. Create a new public repository on GitHub.
-2. Upload these files to the top level of the repository: `index.html`, `style.css`, `app.js`, `simulators.js`, `README.md`.
-3. In the repository go to **Settings, Pages**. Under "Build and deployment" choose **Deploy from a branch**, pick the `main` branch and the `/ (root)` folder, then save.
-4. After a minute the live link appears at the top of that page. It looks like `https://YOUR-NAME.github.io/REPOSITORY-NAME/`.
+I put it on GitHub Pages.
+1. Made a new public repo
+2. Uploaded all files - index.html, style.css, app.js, simulators.js and README
+3. Went to Settings -> Pages -> Deploy from branch -> selected main and root
+4. Waited 1-2 mins and got the link like `https://username.github.io/repo-name/`
 
-## Files
+### Files in this project---
 
-| File | Job |
-|---|---|
-| `index.html` | The two panels, tabs, forms and player controls |
-| `style.css` | Layout, sequence diagram, colors, small-screen layout |
-| `simulators.js` | Builds the list of protocol messages for each activity |
-| `app.js` | The player and the synchronization between the panels |
+- `index.html` - main page, buttons and layout
+- `style.css` - for design and colors
+- `simulators.js` - this file creates the fake DNS/HTTP/SMTP messages
+- `app.js` - controls Next, Back, Play, slider etc
+- `README.md` - this file
 
-## How the panels stay in sync
+### How I synced both panels---
 
-The simulator returns a list of events. Each mode stores `{ events, index }`.
-The right panel draws `events[0..index]`. The left panel (status line, activity log, page or mail or video preview) is drawn from `events[index].ui`.
-Both panels read the same `index`, so Next, Back, Play, the slider, clicking a step and Replay always move them together.
+My simulator gives a list of events. I keep a variable `index`. 
+Right panel shows messages till that index. Left panel shows UI for that same index. So when I click Next/Back or move slider, both panels change together because they use same index.
 
-## What each activity shows
+### What you can do in it---
 
-- **Browsing:** DNS query and response (A record), then HTTP GET and response. Optional TCP handshake and TLS handshake, optional extra files, and a persistent or non-persistent connection choice.
-- **Mail:** DNS query for the MX record, then SMTP: 220 greeting, EHLO, 250 (multi-line), MAIL FROM, 250, RCPT TO, 250, DATA, 354, message ending with a lone ".", 250 queued, QUIT, 221.
-- **Streaming:** DNS, then HTTP GET for the master playlist, the quality playlist, and video segments. Pausing stops segment requests. Changing quality fetches the new playlist, and later segments come from the new quality.
+*Browsing mode:* First it does DNS query/response then HTTP request/response. You can also turn on TCP/TLS handshake, request for extra files like css/js, and check difference between persistent and non-persistent.
 
-## Simplifications (say these in your reflection)
+*Mail mode:* First DNS for MX record, then full SMTP - like greeting, EHLO, MAIL FROM, RCPT TO, DATA, then actual mail and QUIT.
 
-- Nothing goes over a real network. DNS answers use documentation-only IP ranges, except `example.com`.
-- DNS is shown in dig-style text. Real DNS messages are binary.
-- HTTPS traffic is shown decrypted so it can be read.
-- The requests send `Accept-Encoding: identity` so bodies stay readable.
-- SMTP uses port 25 (server to server). Mail apps normally submit on port 587 with a login and STARTTLS.
+*Streaming mode:* DNS then HTTP for playlist and video chunks. If you press pause it stops requesting, if you change quality it fetches new playlist.
 
-## Things to try
+### Some simplifications I made---
 
-- Browsing: type `nope.invalid` (DNS returns NXDOMAIN) or `example.com/missing` (HTTP returns 404).
-- Browsing: open Connection options, tick both boxes, and compare Persistent with Non-persistent.
-- Mail: put a line starting with "." in the body and watch the client add a second ".".
-- Right panel: tick "Show line endings" to see the CR+LF at the end of each line.
+- No real network, all fake data
+- DNS I showed as text only, not as binary packet
+- HTTPS I showed as decrypted for easy understanding
+- For mail I used port 25
+
+### You can try these---
+
+- In browsing type `nope.invalid` - you will get DNS fail, or `example.com/missing` for 404 error
+- Try persistent vs non-persistent and see how many connections it makes
+- In mail body if you type a line starting with "." see what happens (SMTP dot stuffing)
+- On right side tick "Show line endings" to see CRLF
