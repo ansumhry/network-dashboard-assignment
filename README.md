@@ -7,7 +7,7 @@ On the right side it shows what is happening behind like DNS, HTTP, SMTP message
 
 I made it using only HTML, CSS and JavaScript. No backend, no real network, everything is just simulated messages.
 
-*Live link:* [paste your GitHub Pages link here] 
+*Live link:* [https://ansumhry.github.io/network-dashboard-assignment/] 
 *AI used:* Claude Sonnet 4.5 - I used it to help me structure the code and for CSS.
 
 ### How to run---
