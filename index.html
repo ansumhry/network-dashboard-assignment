@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Protocol Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Protocol Visualizer</h1>
+    <p>Do something on the left. Watch the messages behind it on the right.</p>
+  </header>
+
+  <main class="app">
+
+    <!-- ============ LEFT PANEL: ACTIVITY ============ -->
+    <section class="panel activity" aria-labelledby="h-activity">
+      <h2 id="h-activity">Activity</h2>
+
+      <div class="tabs" role="tablist" aria-label="Choose an activity">
+        <button type="button" role="tab" id="tab-browse" class="tab" data-mode="browse" aria-selected="true" aria-controls="pane-browse">Browsing</button>
+        <button type="button" role="tab" id="tab-mail" class="tab" data-mode="mail" aria-selected="false" aria-controls="pane-mail" tabindex="-1">Mail</button>
+        <button type="button" role="tab" id="tab-stream" class="tab" data-mode="stream" aria-selected="false" aria-controls="pane-stream" tabindex="-1">Streaming</button>
+      </div>
+
+      <div class="status" role="status" aria-live="polite">
+        <span class="dot" id="status-dot"></span>
+        <span id="status-text">Enter a web address and press Visit.</span>
+      </div>
+
+      <!-- Browsing -->
+      <div id="pane-browse" role="tabpanel" aria-labelledby="tab-browse">
+        <form id="form-browse" novalidate>
+          <label for="url">Web address</label>
+          <div class="inline">
+            <input id="url" type="text" value="example.com" autocomplete="off" spellcheck="false" inputmode="url">
+            <button type="submit" class="primary">Visit</button>
+          </div>
+          <p class="error" id="err-browse" role="alert" hidden></p>
+          <details>
+            <summary>Connection options</summary>
+            <label class="check"><input type="checkbox" id="opt-transport"> Show TCP and TLS setup</label>
+            <label class="check"><input type="checkbox" id="opt-embedded"> Also load style.css and logo.png</label>
+            <label for="opt-conn" class="select-label">Connection type</label>
+            <select id="opt-conn">
+              <option value="keep-alive">Persistent (keep-alive)</option>
+              <option value="close">Non-persistent (close)</option>
+            </select>
+            <p class="hint">Tick both boxes, then compare Persistent with Non-persistent. Count the TCP connections in the summary under the page preview.</p>
+          </details>
+        </form>
+        <div class="preview" id="preview-browse"></div>
+      </div>
+
+      <!-- Mail -->
+      <div id="pane-mail" role="tabpanel" aria-labelledby="tab-mail" hidden>
+        <form id="form-mail" novalidate>
+          <label for="mail-from">From</label>
+          <input id="mail-from" type="text" value="student@cn-lab.local" autocomplete="off" spellcheck="false">
+          <label for="mail-to">To</label>
+          <input id="mail-to" type="text" value="bob@example.com" autocomplete="off" spellcheck="false" inputmode="email">
+          <label for="mail-subject">Subject</label>
+          <input id="mail-subject" type="text" value="Hello from the lab" autocomplete="off">
+          <label for="mail-body">Body</label>
+          <textarea id="mail-body" rows="4">Hi Bob,&#10;This message was sent by a simulated SMTP client.</textarea>
+          <p class="error" id="err-mail" role="alert" hidden></p>
+          <button type="submit" class="primary">Send</button>
+        </form>
+        <div class="preview" id="preview-mail"></div>
+      </div>
+
+      <!-- Streaming -->
+      <div id="pane-stream" role="tabpanel" aria-labelledby="tab-stream" hidden>
+        <div class="preview" id="preview-stream"></div>
+        <div class="stream-controls">
+          <button type="button" id="btn-video" class="primary">Play video</button>
+          <label class="select-inline">Quality
+            <select id="quality">
+              <option value="480p">480p</option>
+              <option value="720p" selected>720p</option>
+              <option value="1080p">1080p</option>
+            </select>
+          </label>
+          <button type="button" id="btn-reset" class="ghost">Stop and reset</button>
+        </div>
+      </div>
+
+      <h3 class="log-title">Activity log</h3>
+      <ol class="log" id="log" aria-label="Activity log"></ol>
+    </section>
+
+    <!-- ============ RIGHT PANEL: PROTOCOL VISUALIZER ============ -->
+    <section class="panel viz" aria-labelledby="h-viz">
+      <div class="viz-head">
+        <h2 id="h-viz">Protocol visualizer</h2>
+        <ul class="legend" aria-label="Legend">
+          <li><span class="sw req"></span>Client to server</li>
+          <li><span class="sw res"></span>Server to client</li>
+        </ul>
+        <label class="check eol-toggle"><input type="checkbox" id="opt-eol"> Show line endings</label>
+      </div>
+
+      <div class="controls" role="group" aria-label="Playback controls">
+        <button type="button" id="btn-replay" class="ghost" disabled>Replay</button>
+        <button type="button" id="btn-back" class="ghost" disabled>Back</button>
+        <button type="button" id="btn-play" class="primary" disabled>Play</button>
+        <button type="button" id="btn-next" class="ghost" disabled>Next</button>
+        <label class="select-inline">Speed
+          <select id="speed">
+            <option value="0.5">0.5x</option>
+            <option value="1" selected>1x</option>
+            <option value="2">2x</option>
+          </select>
+        </label>
+        <input type="range" id="scrub" min="0" max="0" value="0" step="1" disabled aria-label="Jump to step">
+        <span class="count" id="step-count">No steps yet</span>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="actors" id="actors"></div>
+        <div class="rows" id="rows">
+          <div class="lifeline" style="left:16.67%"></div>
+          <div class="lifeline" style="left:50%"></div>
+          <div class="lifeline" style="left:83.33%"></div>
+          <p class="empty" id="empty">Messages will appear here, one step at a time.</p>
+        </div>
+      </div>
+
+      <div class="detail" id="detail" aria-live="off"></div>
+    </section>
+  </main>
+
+  <script src="simulators.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
